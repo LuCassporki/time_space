@@ -160,24 +160,33 @@
             z-index: 2;
             box-sizing: border-box;
             border-left: 4px solid transparent;
-            background: rgba(20, 13, 36, 0.95);
+            background: rgb(20, 13, 36);
             cursor: grab;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 6px rgb(0, 0, 0);
             transition: transform 0.2s ease, box-shadow 0.2s ease;
             height: 100%; 
         }
 
         .event-card:active { cursor: grabbing; opacity: 0.5; }
 
-        .event-card:hover {
-            transform: scale(1.05);
-            box-shadow: 0 10px 25px rgba(189, 0, 255, 0.4);
+      .event-card:hover {
+            transform: scale(1.1); /* Réduit un poil de 1.5 à 1.05 pour éviter que le texte devienne flou et bave trop au zoom */
+            box-shadow: 0 0 25px rgba(189, 0, 255, 0.6);
             z-index: 999;
-            background: #19102e;
+            
+            /* EFFET FOND SOMBRE FUMÉ COMPLET */
+            background: #0f0027ec !important; 
+            border: 1px solid var(--border-color);
+            border-left: 4px solid currentColor; /* Garde la couleur du profil à gauche */
+            
             height: auto;
             min-height: max-content;
             position: relative;
-            width: 180%; /* S'élargit un peu au survol pour mieux lire la double colonne */
+            width: 180%; 
+
+            /* EFFET DE SURBRILLANCE ET DU TEXTE NÉON */
+            color: #ffffff;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.6), 0 0 15px rgba(189, 0, 255, 0.4);
         }
 
         /* Profils de couleur */
@@ -190,8 +199,17 @@
 
         .event-card-time { font-size: 0.85em; color: var(--neon-cyan); font-weight: bold; margin-top: 2px; }
         .event-card-notes { display: none; font-size: 0.85em; color: #a291c3; margin-top: 6px; border-top: 1px dashed var(--border-color); padding-top: 4px; }
-        .event-card:hover .event-card-notes { display: block; }
-
+        /* REND LES NOTES PLUS LISIBLES AU HOVER */
+        .event-card:hover .event-card-notes {
+            display: block;
+            color: #e5def5;
+            text-shadow: none; /* Désactive l'effet néon sur les notes pour garder le petit texte lisible */
+        }
+/* SURBRILLANCE SPÉCIFIQUE DES HEURES AU HOVER */
+        .event-card:hover .event-card-time {
+            color: #fff !important;
+            text-shadow: 0 0 8px var(--neon-cyan), 0 0 15px var(--neon-cyan);
+        }
         .planning-container::-webkit-scrollbar { width: 8px; }
         .planning-container::-webkit-scrollbar-track { background: var(--bg-main); }
         .planning-container::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
