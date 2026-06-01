@@ -1,0 +1,175 @@
+{
+    "config_comptes": {
+    "compte_A": { "nom": "HDO_SYSTEM", "couleur_colonne": "rgba(189, 0, 255, 0.05)" },
+    "compte_B": { "nom": "PERSO_SYSTEM", "couleur_colonne": "rgba(0, 240, 255, 0.05)" }
+  },
+  "config_profils": {
+    "dev": {
+      "nom": "DEVELOPPEMENT",
+      "couleur_neon": "var(--neon-green)",
+      "prefixe": "PROJET_HOP"
+    },
+    "crea": {
+      "nom": "CREATION_LORE",
+      "couleur_neon": "var(--neon-purple)",
+      "prefixe": "HDO_CORE"
+    },
+    "school": {
+      "nom": "school",
+      "couleur_neon": "var(--neon-red)",
+      "prefixe": "SCHOOL_TIME"
+    },
+    "admin": {
+      "nom": "SYSTEM_MAINTENANCE",
+      "couleur_neon": "var(--neon-gold)",
+      "prefixe": "SYS_CHECK"
+    }
+  },
+  
+  "tasks": [
+    {
+      "id": "hdo_task_01",
+      "compte": "compte_B",
+      "profil": "dev",
+      "titre": "SCRIPT_C#",
+      "notes": "Refactoring physiques, forces de mouvement et scripts de combat.",
+      "dureeMinutes": 120,
+      "position": {
+        "jours": [1],
+        "heureDebut": "05:30"
+      }
+    },
+    {
+      "id": "hdo_task_02",
+      "compte": "compte_B",
+      "profil": "crea",
+      "titre": "ALICE_MUSE",
+      "notes": "Écriture du manifeste, lore HDO et intégration des mécaniques d'ARG.",
+      "dureeMinutes": 75,
+      "position": {
+        "jours": [3],
+        "heureDebut": "04:15"
+      }
+    },
+    {
+      "id": "hdo_task_03",
+      "compte": "compte_B",
+      "profil": "admin",
+      "titre": "PORT_SCAN",
+      "notes": "Tests de scripts Python, wargames Bandit OverTheWire et check réseau.",
+      "dureeMinutes": 90,
+      "position": {
+        "jours": [3],
+        "heureDebut": "01:00"
+      }
+    },
+    {
+      "id": "hdo_task_04",
+      "compte": "compte_B",
+      "profil": "admin",
+      "titre": "PORT_SCAN2",
+      "notes": "Tests de scripts Python, wargames Bandit OverTheWire et check réseau.",
+      "dureeMinutes": 60,
+      "position": {
+        "jours": [6],
+        "heureDebut": "6:00"
+      }
+    },
+    {
+      "id": "school_task_01",
+      "compte": "compte_A",
+      "profil": "school",
+      "titre": "Check-in",
+      "notes": "en attente",
+      "dureeMinutes": 15,
+      "position": {
+        "jours": [1, 2, 3, 4],
+        "heureDebut": "09:00"
+      }
+    },
+    {
+      "id": "school_task_02",
+      "compte": "compte_A",
+      "profil": "school",
+      "titre": "Projet",
+      "notes": "en attente",
+      "dureeMinutes": 165,
+      "position": {
+        "jours": [1, 2, 3, 4],
+        "heureDebut": "09:15"
+      }
+    },
+    {
+      "id": "school_task_03",
+      "compte": "compte_A",
+      "profil": "school",
+      "titre": "pause",
+      "notes": "en attente",
+      "dureeMinutes": 60,
+      "position": {
+        "jours": [1, 2, 3, 4, 5],
+        "heureDebut": "12:00"
+      }
+    },
+    {
+      "id": "school_task_04",
+      "compte": "compte_A",
+      "profil": "school",
+      "titre": "Daily",
+      "notes": "en attente",
+      "dureeMinutes": 15,
+      "position": {
+        "jours": [1, 2, 3, 4],
+        "heureDebut": "13:00"
+      }
+    },
+    {
+      "id": "school_task_05",
+      "compte": "compte_A",
+      "profil": "school",
+      "titre": "work",
+      "notes": "en attente",
+      "dureeMinutes": 195,
+      "position": {
+        "jours": [1, 2, 3, 4],
+        "heureDebut": "13:15"
+      }
+    },
+    {
+      "id": "school_task_06",
+      "compte": "compte_A",
+      "profil": "school",
+      "titre": "Debrief",
+      "notes": "en attente",
+      "dureeMinutes": 30,
+      "position": {
+        "jours": [1, 2, 3, 4],
+        "heureDebut": "16:30"
+      }
+    },
+    {
+      "id": "school_task_07",
+      "compte": "compte_A",
+      "profil": "school",
+      "titre": "Code Review",
+      "notes": "en attente",
+      "dureeMinutes": 180,
+      "position": {
+        "jours": [5],
+        "heureDebut": "09:00"
+      }
+    },
+    {
+      "id": "school_task_08",
+      "compte": "compte_A",
+      "profil": "school",
+      "titre": "revision/atl",
+      "notes": "en attente",
+      "dureeMinutes": 240,
+      "position": {
+        "jours": [5],
+        "heureDebut": "13:00"
+      }
+    }
+  ]
+}

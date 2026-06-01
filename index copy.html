@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>HDO System - Dual Matrix</title>
+    <style>
+        :root {
+            --grid-hour-height: 60px;
+            --time-col-width: 70px;
+            
+            /* Palette HDO */
+            --bg-main: #0a0512;        
+            --bg-card: #140d24;        
+            --border-color: #261942;   
+            --hour-text: #8b75b8;      
+            
+            /* Couleurs Néon */
+            --neon-gold: #ffb700;      
+            --neon-purple: #bd00ff;    
+            --neon-green: #00ff66;     
+            --neon-cyan: #00f0ff;      
+            --neon-red: #ff0000;      
+        }
+
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--bg-main);
+            color: #ffffff;
+            margin: 20px;
+            user-select: none;
+        }
+
+        h2 {
+            color: var(--neon-gold);
+            text-shadow: 0 0 10px rgba(255, 183, 0, 0.5);
+            margin-bottom: 5px;
+            letter-spacing: 2px;
+        }
+
+        p.subtitle {
+            color: var(--hour-text);
+            font-size: 0.85em;
+            margin-bottom: 20px;
+        }
+
+        /* CONFIGURATION DE LA GRILLE : 1 col Heure + 14 sous-colonnes (7 jours x 2 comptes) */
+        .planning-container {
+            display: grid;
+            grid-template-columns: var(--time-col-width) repeat(14, 1fr);
+            grid-template-rows: 60px repeat(96, 30px); 
+            border: 2px solid var(--border-color);
+            background-color: var(--bg-card);
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 0 20px rgba(189, 0, 255, 0.15);
+            border-radius: 8px;
+        }
+
+        /* Structure de l'en-tête double niveau */
+        .planning-header {
+            position: sticky;
+            top: 0;
+            background: #110822;
+            z-index: 10;
+            grid-row: 1;
+            grid-column: 1 / span 15;
+            display: grid;
+            grid-template-columns: var(--time-col-width) repeat(14, 1fr);
+            height: auto;
+        }
+
+        .header-cell {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #fff;
+            border-bottom: 2px solid var(--neon-purple);
+            border-right: 2px solid var(--border-color);
+            text-transform: uppercase;
+            font-size: 0.8em;
+            letter-spacing: 1px;
+            background: #110822;
+            padding: 10px 0;
+            grid-column: span 2;
+        }
+
+        .header-cell .sub-titles {  
+            display: flex;
+            width: 100%;
+            justify-content: space-around;
+            font-size: 0.7em;
+            margin-top: 5px;
+            color: var(--hour-text);
+        }
+
+        .header-cell:first-child { 
+            position: sticky;
+            left: 0;
+            z-index: 11;
+            background: #110822;
+            border-right: 2px solid var(--neon-purple);
+        }
+
+        /* Colonne des Heures */
+        .time-cell { 
+            grid-column: 1;
+            text-align: center;
+            font-size: 0.85em;
+            color: var(--hour-text);
+            border-right: 2px solid var(--neon-purple);
+            border-bottom: 1px dashed var(--border-color);
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding-top: 2px;
+            box-sizing: border-box;
+            background: #0d061a;
+            position: sticky;
+            left: 0;
+            font-weight: bold;
+            z-index: 5;
+        }
+
+        /* Zones de Drop et styles alternés de colonnes */
+        .drop-zone {
+            grid-width: 100%;
+            grid-height: 100%;
+            box-sizing: border-box;
+            z-index: 1;
+        }
+
+        /* Séparateurs visuels entre les jours (toutes les 2 sous-colonnes) */
+        .drop-zone[data-account="compte_B"] {
+            border-right: 2px solid var(--border-color);
+        }
+        .drop-zone[data-account="compte_A"] {
+            border-right: 1px dashed rgba(38, 25, 66, 0.4);
+        }
+        
+        .drop-zone {
+            border-bottom: 1px dashed rgba(38, 25, 66, 0.2);
+        }
+
+        .drop-zone.drag-over {
+            background-color: rgba(0, 240, 255, 0.1) !important;
+            border: 1px dashed var(--neon-cyan);
+        }
+
+        /* Éléments Mobiles */
+        .event-card {
+            color: #ffffff;
+            padding: 6px;
+            font-size: 0.75em;
+            border-radius: 4px;
+            overflow: hidden;
+            z-index: 2;
+            box-sizing: border-box;
+            border-left: 4px solid transparent;
+            background: rgba(20, 13, 36, 0.95);
+            cursor: grab;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            height: 100%; 
+        }
+
+        .event-card:active { cursor: grabbing; opacity: 0.5; }
+
+        .event-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(189, 0, 255, 0.4);
+            z-index: 999;
+            background: #19102e;
+            height: auto;
+            min-height: max-content;
+            position: relative;
+            width: 180%; /* S'élargit un peu au survol pour mieux lire la double colonne */
+        }
+
+        /* Profils de couleur */
+        .event-card.dev { border-left-color: var(--neon-green); background: linear-gradient(90deg, rgba(0, 255, 102, 0.15) 0%, rgba(20, 13, 36, 0.95) 100%); }
+        .event-card.crea { border-left-color: var(--neon-purple); background: linear-gradient(90deg, rgba(189, 0, 255, 0.15) 0%, rgba(20, 13, 36, 0.95) 100%); }
+        .event-card.admin { border-left-color: var(--neon-gold); background: linear-gradient(90deg, rgba(255, 183, 0, 0.15) 0%, rgba(20, 13, 36, 0.95) 100%); }
+        .event-card.perso { border-left-color: var(--neon-cyan); background: linear-gradient(90deg, rgba(0, 240, 255, 0.15) 0%, rgba(20, 13, 36, 0.95) 100%); }
+        .event-card.school { border-left-color: var(--neon-red); background: linear-gradient(90deg, rgba(255, 38, 0, 0.15) 0%, rgba(20, 13, 36, 0.95) 100%); }
+
+        .event-card-time { font-size: 0.85em; color: var(--neon-cyan); font-weight: bold; margin-top: 2px; }
+        .event-card-notes { display: none; font-size: 0.85em; color: #a291c3; margin-top: 6px; border-top: 1px dashed var(--border-color); padding-top: 4px; }
+        .event-card:hover .event-card-notes { display: block; }
+
+        .planning-container::-webkit-scrollbar { width: 8px; }
+        .planning-container::-webkit-scrollbar-track { background: var(--bg-main); }
+        .planning-container::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+    <h2>HDO_SYSTEM // DUAL_MATRIX_COMPARATOR</h2>
+    <p class="subtitle">> STATUT : MULTI_ACCOUNT_GRID_ACTIVE // 2_COLUMNS_PER_DAY</p>
+
+    <div class="planning-container" id="planningGrid">
+       <div class="planning-header">
+            <div class="header-cell" style="grid-column: 1; border-right: 2px solid var(--neon-purple);">TIME</div>
+            
+            <div class="header-cell">LUN <div class="sub-titles"><span>HDO</span><span>PERSO</span></div></div>
+            <div class="header-cell">MAR <div class="sub-titles"><span>HDO</span><span>PERSO</span></div></div>
+            <div class="header-cell">MER <div class="sub-titles"><span>HDO</span><span>PERSO</span></div></div>
+            <div class="header-cell">JEU <div class="sub-titles"><span>HDO</span><span>PERSO</span></div></div>
+            <div class="header-cell">VEN <div class="sub-titles"><span>HDO</span><span>PERSO</span></div></div>
+            <div class="header-cell">SAM <div class="sub-titles"><span>HDO</span><span>PERSO</span></div></div>
+            <div class="header-cell">DIM <div class="sub-titles"><span>HDO</span><span>PERSO</span></div></div>
+        </div>
+    </div>
+</body>
+<script>
+    const container = document.getElementById('planningGrid');
+    let hdoDatabase = {}; 
+
+    // 1. Traducteurs Mathématiques de colonnes (Pour la double entrée)
+    // Jour 1 Compte A -> Col 2 | Jour 1 Compte B -> Col 3, etc.
+    function calculateGridColumn(jour, compte) {
+        const baseCol = ((jour - 1) * 2) + 2; 
+        return compte === "compte_B" ? baseCol + 1 : baseCol;
+    }
+
+    function calculateDataFromColumn(col) {
+        const totalSubCols = col - 2;
+        const jour = Math.floor(totalSubCols / 2) + 1;
+        const compte = totalSubCols % 2 === 1 ? "compte_B" : "compte_A";
+        return { jour, compte };
+    }
+
+    // 2. Chargement des données JSON
+    async function loadPlanningData() {
+        try {
+            const response = await fetch('cal.json');
+            hdoDatabase = await response.json();
+            console.log(">> DUAL DATABASE CHARGÉE");
+            generateGridZones(); // Lance les drop zones avec la teinte de fond du compte
+            initPlanningCards();
+        } catch (error) {
+            console.error("Erreur JSON :", error);
+        }
+    }
+
+    window.onload = () => {
+        generateTimeColumn();
+        loadPlanningData();
+    };
+
+    function generateTimeColumn() {
+        for (let h = 0; h < 24; h++) {
+            const cell = document.createElement('div');
+            cell.className = 'time-cell';
+            cell.innerText = `${String(h).padStart(2, '0')}:00`;
+            cell.style.gridRow = `${(h * 4) + 2} / span 4`; 
+            container.appendChild(cell);
+        }
+    }
+
+    function timeToGridRow(timeStr) {
+        const [heures, minutes] = timeStr.split(':').map(Number);
+        return ((heures * 4) + Math.floor(minutes / 15)) + 2; 
+    }
+
+    function gridRowToTime(row) {
+        const totalQuartsHeure = row - 2;
+        return `${String(Math.floor(totalQuartsHeure / 4)).padStart(2, '0')}:${String((totalQuartsHeure % 4) * 15).padStart(2, '0')}`;
+    }
+
+    // 3. Génération des Drop-Zones en mode double colonne
+    function generateGridZones() {
+        const comptes = hdoDatabase.config_comptes;
+        
+        for (let row = 2; row <= 97; row++) {
+            for (let col = 2; col <= 15; col++) {
+                const { jour, compte } = calculateDataFromColumn(col);
+                
+                const zone = document.createElement('div');
+                zone.className = 'drop-zone';
+                zone.dataset.row = row;
+                zone.dataset.col = col;
+                zone.dataset.account = compte;
+                zone.style.gridRow = row;
+                zone.style.gridColumn = col;
+                
+                // On applique la couleur de fond spécifique du compte définie dans le JSON
+                zone.style.backgroundColor = comptes[compte].couleur_colonne;
+
+                zone.addEventListener('dragover', e => e.preventDefault());
+                zone.addEventListener('dragenter', () => zone.classList.add('drag-over'));
+                zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+                
+                zone.addEventListener('drop', e => {
+                    e.preventDefault();
+                    zone.classList.remove('drag-over');
+                    const cardId = e.dataTransfer.getData('text/plain');
+                    const card = document.getElementById(cardId);
+                    
+                    if (card) {
+                        const span = card.dataset.span;
+                        const newRow = parseInt(zone.dataset.row);
+                        const newCol = parseInt(zone.dataset.col);
+                        const targetData = calculateDataFromColumn(newCol);
+
+                        card.style.gridColumn = newCol;
+                        card.style.gridRow = `${newRow} / span ${span}`;
+                        
+                        // MUTATION : Met à jour le jour, l'heure ET le compte d'appartenance !
+                        const targetTask = hdoDatabase.tasks.find(t => t.id === card.dataset.taskId);
+                        if (targetTask) {
+                            const arrayIndex = parseInt(card.dataset.listIndex);
+                            targetTask.compte = targetData.compte; // Le bloc change de compte si glissé dans l'autre colonne !
+                            targetTask.position.jours[arrayIndex] = targetData.jour;
+                            targetTask.position.heureDebut = gridRowToTime(newRow); 
+                            
+                            console.clear();
+                            console.log(">> MUTATION DOUBLE ENTRÉE REUSSIE :");
+                            console.log(JSON.stringify(hdoDatabase, null, 2));
+                        }
+                    }
+                });
+
+                container.appendChild(zone);
+            }
+        }
+    }
+
+    // 4. Injection des Cartes sur la Grille Double
+    function initPlanningCards() {
+        if (!hdoDatabase.tasks) return;
+
+        hdoDatabase.tasks.forEach(task => {
+            const profilConfig = hdoDatabase.config_profils[task.profil];
+            const span = Math.ceil(task.dureeMinutes / 15);
+            const startRow = timeToGridRow(task.position.heureDebut);
+
+            if (!task.position || !task.position.jours || !Array.isArray(task.position.jours)) return;
+
+            task.position.jours.forEach((unJour, index) => {
+                const card = document.createElement('div');
+                card.className = `event-card ${task.profil}`;
+                card.id = `${task.id}-dayIndex-${index}`;
+                card.draggable = true;
+                card.dataset.span = span;
+                card.dataset.taskId = task.id;       
+                card.dataset.listIndex = index;     
+
+                card.innerHTML = `
+                    <strong>${profilConfig.prefixe} // ${task.titre}</strong>
+                    <div class="event-card-time">[${task.position.heureDebut}]</div>
+                    <div class="event-card-notes">${task.notes}</div>
+                `;
+
+                // Placement dynamique en calculant la sous-colonne exacte
+                card.style.gridColumn = calculateGridColumn(unJour, task.compte); 
+                card.style.gridRow = `${startRow} / span ${span}`;
+
+                card.addEventListener('dragstart', e => {
+                    e.dataTransfer.setData('text/plain', card.id);
+                    setTimeout(() => card.style.visibility = 'hidden', 0);
+                });
+
+                card.addEventListener('dragend', () => card.style.visibility = 'visible');
+
+                container.appendChild(card);
+            });
+        });
+    }
+</script>
+
+</html>
